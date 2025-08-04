@@ -2,5 +2,5 @@
   "build": {
     "env": "python"
   },
-  "start": "python bot.py"
+  "start": "python picnicbot.py"
 }
