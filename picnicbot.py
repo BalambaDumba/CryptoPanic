@@ -3,10 +3,25 @@
 import requests
 import time
 import telebot
+import os
 from config import *
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 posted_titles = set()
+
+# Загружаем chat_id, если он уже был сохранён
+def load_chat_id():
+    if os.path.exists("chat_id.txt"):
+        with open("chat_id.txt", "r") as file:
+            return file.read().strip()
+    return None
+
+# Сохраняем chat_id
+def save_chat_id(chat_id):
+    with open("chat_id.txt", "w") as file:
+        file.write(str(chat_id))
+
+CHAT_ID = load_chat_id()
 
 def get_crypto_news():
     url = f'https://cryptopanic.com/api/v1/posts/?auth_token={CRYPTO_PANIC_API_KEY}&public=true'
@@ -19,6 +34,10 @@ def get_crypto_news():
         return []
 
 def send_news():
+    if not CHAT_ID:
+        print("chat_id ещё не получен. Напиши боту команду /start.")
+        return
+
     news_items = get_crypto_news()
     for item in news_items:
         title = item['title']
@@ -28,13 +47,16 @@ def send_news():
             message = f"📰 <b>{title}</b>\n{url}"
             bot.send_message(CHAT_ID, message, parse_mode='HTML')
 
-# Отправь /start боту, чтобы получить chat_id
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, f"Привет! Твой chat_id: {message.chat.id}")
+    global CHAT_ID
+    CHAT_ID = message.chat.id
+    save_chat_id(CHAT_ID)
+    bot.reply_to(message, f"✅ Готово! Твой chat_id сохранён: {CHAT_ID}\nТеперь бот будет присылать тебе новости.")
 
+# Запускаем бота
 if __name__ == "__main__":
-    print("Бот запущен. Отправь /start своему боту в Telegram.")
+    print("Бот запущен. Напиши /start боту в Telegram, чтобы он начал отправлять новости.")
     bot.polling(non_stop=True)
 
     while True:
