@@ -52,7 +52,7 @@ def start(message):
     global CHAT_ID
     CHAT_ID = message.chat.id
     save_chat_id(CHAT_ID)
-    bot.reply_to(message, f"✅ Готово! Твой chat_id сохранён: {CHAT_ID}\nТеперь бот будет присылать тебе новости.")
+    bot.reply_to(message, f"Теперь бот будет присылать тебе новости!")
 
 # Запускаем бота
 if __name__ == "__main__":
